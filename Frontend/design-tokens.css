@@ -1,0 +1,284 @@
+/**
+ * PREMIUM DESIGN TOKEN SYSTEM
+ * Inspired by Unseen Studio's minimalist aesthetic
+ */
+
+:root {
+  /* === SPACING SYSTEM === */
+  --spacing-1: 8px;
+  --spacing-2: 16px;
+  --spacing-3: 24px;
+  --spacing-4: 32px;
+  --spacing-5: 40px;
+  --spacing-6: 48px;
+  --spacing-7: 56px;
+  --spacing-8: 64px;
+  --spacing-10: 80px;
+  --spacing-12: 96px;
+  --spacing-16: 128px;
+  --spacing-20: 160px;
+  --spacing-24: 192px;
+
+  /* === COLOR SYSTEM === */
+  /* Primary Colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-brand-brown: #2d2420;
+  --color-brand-beige: #e8dad1;
+  --color-brand-light: #f5ebe4;
+  
+  /* Opacity Variants */
+  --color-black-10: rgba(0, 0, 0, 0.1);
+  --color-black-20: rgba(0, 0, 0, 0.2);
+  --color-black-40: rgba(0, 0, 0, 0.4);
+  --color-black-60: rgba(0, 0, 0, 0.6);
+  --color-black-80: rgba(0, 0, 0, 0.8);
+  
+  --color-white-10: rgba(255, 255, 255, 0.1);
+  --color-white-20: rgba(255, 255, 255, 0.2);
+  --color-white-40: rgba(255, 255, 255, 0.4);
+  --color-white-60: rgba(255, 255, 255, 0.6);
+  --color-white-80: rgba(255, 255, 255, 0.8);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #2d2420 0%, #6b5d56 100%);
+  --gradient-accent: linear-gradient(135deg, #c9b8ab 0%, #d4c4b8 100%);
+  --gradient-overlay: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
+
+  /* === TIMING FUNCTIONS === */
+  --ease-premium: cubic-bezier(0.2, 0.8, 0.3, 1.0);
+  --ease-smooth: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  
+  /* === DURATION SYSTEM === */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --duration-medium: 400ms;
+  --duration-slow: 500ms;
+  --duration-slower: 800ms;
+  --duration-slowest: 1200ms;
+  --duration-ultra: 2000ms;
+
+  /* === ANIMATION DELAYS === */
+  --delay-none: 0ms;
+  --delay-tiny: 50ms;
+  --delay-small: 100ms;
+  --delay-medium: 200ms;
+  --delay-large: 300ms;
+  --delay-xl: 400ms;
+
+  /* === CURSOR SYSTEM === */
+  --cursor-dot-size: 4px;
+  --cursor-ring-size: 42px;
+  --cursor-ring-hover-size: 60px;
+  --cursor-ring-active-size: 50px;
+  --cursor-magnetic-distance: 20px;
+
+  /* === BLUR EFFECTS === */
+  --blur-sm: 4px;
+  --blur-md: 8px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
+  --blur-2xl: 40px;
+
+  /* === TYPOGRAPHY SCALE === */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  --font-size-5xl: 3rem;      /* 48px */
+  --font-size-6xl: 3.75rem;   /* 60px */
+  --font-size-7xl: 4.5rem;    /* 72px */
+  --font-size-8xl: 6rem;      /* 96px */
+  --font-size-9xl: 8rem;      /* 128px */
+  
+  /* Aliases for backward compatibility */
+  --text-xs: var(--font-size-xs);
+  --text-sm: var(--font-size-sm);
+  --text-base: var(--font-size-base);
+  --text-lg: var(--font-size-lg);
+  --text-xl: var(--font-size-xl);
+  --text-2xl: var(--font-size-2xl);
+  --text-3xl: var(--font-size-3xl);
+  --text-4xl: var(--font-size-4xl);
+  --text-5xl: var(--font-size-5xl);
+  --text-6xl: var(--font-size-6xl);
+  --text-7xl: var(--font-size-7xl);
+  --text-8xl: var(--font-size-8xl);
+  --text-9xl: var(--font-size-9xl);
+
+  /* === FONT WEIGHTS === */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* === BORDER RADIUS === */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* === SHADOWS === */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* === Z-INDEX SCALE === */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-popover: 1400;
+  --z-tooltip: 1500;
+  --z-cursor: 9999;
+
+  /* === INTERACTION STATES === */
+  --hover-scale: 1.05;
+  --active-scale: 0.95;
+  --button-press-scale: 0.95;
+  
+  /* === STAGGER TIMING === */
+  --stagger-tiny: 30ms;
+  --stagger-small: 50ms;
+  --stagger-base: 100ms;
+  --stagger-large: 150ms;
+
+  /* === PERFORMANCE FLAGS === */
+  --gpu-acceleration: translateZ(0);
+  --will-change-transform: transform;
+  --will-change-opacity: opacity;
+}
+
+/* === UTILITY CLASSES FOR TOKENS === */
+@layer utilities {
+  /* Spacing Utilities */
+  .spacing-1 { gap: var(--spacing-1); }
+  .spacing-2 { gap: var(--spacing-2); }
+  .spacing-4 { gap: var(--spacing-4); }
+  .spacing-8 { gap: var(--spacing-8); }
+  .spacing-16 { gap: var(--spacing-16); }
+
+  /* Animation Utilities */
+  .animate-premium {
+    transition-timing-function: var(--ease-premium);
+  }
+  
+  .animate-smooth {
+    transition-timing-function: var(--ease-smooth);
+  }
+
+  /* GPU Acceleration */
+  .gpu-accelerated {
+    transform: var(--gpu-acceleration);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Will-Change Optimizations */
+  .optimize-transform {
+    will-change: transform;
+  }
+
+  .optimize-opacity {
+    will-change: opacity;
+  }
+
+  .optimize-all {
+    will-change: transform, opacity;
+  }
+
+  /* Remove will-change after animation */
+  .optimize-none {
+    will-change: auto;
+  }
+}
+
+/* === COMPONENT-SPECIFIC TOKENS === */
+
+/* Cursor Component */
+.cursor-dot {
+  width: var(--cursor-dot-size);
+  height: var(--cursor-dot-size);
+}
+
+.cursor-ring {
+  width: var(--cursor-ring-size);
+  height: var(--cursor-ring-size);
+  border-width: 1.5px;
+  border-color: var(--color-black-40);
+}
+
+/* Card Hover Effects */
+.card-hover-bg {
+  transition: width var(--duration-medium) var(--ease-out);
+}
+
+.card-hover-text {
+  transition: color var(--duration-base) var(--ease-premium);
+  transition-delay: var(--delay-small);
+}
+
+.card-hover-label {
+  transition: opacity var(--duration-base) var(--ease-premium),
+              transform var(--duration-base) var(--ease-premium);
+  transition-delay: var(--delay-large);
+}
+
+/* Interactive Text */
+.interactive-text-underline {
+  transition: width var(--duration-base) var(--ease-premium);
+}
+
+.interactive-text-spacing {
+  transition: letter-spacing var(--duration-base) var(--ease-premium);
+}
+
+/* Navigation Overlay */
+.nav-overlay-backdrop {
+  backdrop-filter: blur(var(--blur-md));
+}
+
+.nav-item-stagger {
+  animation-delay: calc(var(--item-index) * var(--stagger-base));
+}
+
+/* === RESPONSIVE BREAKPOINTS === */
+@custom-media --mobile (max-width: 767px);
+@custom-media --tablet (min-width: 768px) and (max-width: 1023px);
+@custom-media --desktop (min-width: 1024px);
+@custom-media --large-desktop (min-width: 1440px);
+
+/* === MOTION PREFERENCES === */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-medium: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+    --duration-slowest: 0ms;
+    --duration-ultra: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
