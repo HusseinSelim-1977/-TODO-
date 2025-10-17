@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Input } from "./Frontend/input";
+import { Input } from "../Frontend/input";
 import { Button } from "../Frontend/button";
 
 interface LoginScreenProps {
