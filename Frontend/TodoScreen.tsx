@@ -149,7 +149,7 @@ export function TodoScreen({ userName, onLogout }: TodoScreenProps) {
         transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
         className="relative z-10 flex items-center justify-between px-8 py-6"
       >
-        <div className="text-[#2d2420] tracking-tight">taskflow</div>
+        <div className="text-[#2d2420] tracking-tight">-TODO-</div>
         <div className="flex items-center gap-6">
           <InteractiveText className="text-sm text-[#6b5d56] hidden md:block">
             {userName}
