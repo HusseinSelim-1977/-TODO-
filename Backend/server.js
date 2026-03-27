@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 )
 // ✅ No duplicate index — unique:true above handles it
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model('User', userSchema, 'Users')
 
 const todoSchema = new mongoose.Schema(
   {
@@ -55,7 +55,7 @@ const todoSchema = new mongoose.Schema(
 todoSchema.index({ user: 1, createdAt: -1 })
 // Partial index for active todos — speeds up "show active tasks" queries at scale
 todoSchema.index({ user: 1, completed: 1 }, { partialFilterExpression: { completed: false } })
-const Todo = mongoose.model('Todo', todoSchema)
+const Todo = mongoose.model('Todo', todoSchema, 'TODOs')
 
 // ── App ───────────────────────────────────────────────────────────────────────
 const app = express()
