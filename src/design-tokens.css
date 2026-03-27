@@ -1,0 +1,21 @@
+:root {
+  --ease-premium: cubic-bezier(0.2, 0.8, 0.3, 1.0);
+  --ease-smooth: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@layer utilities {
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

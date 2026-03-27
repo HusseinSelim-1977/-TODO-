@@ -1,0 +1,53 @@
+@import './design-tokens.css';
+@import "tailwindcss";
+
+:root {
+  --font-size: 16px;
+  --background: #e8dad1;
+  --foreground: #2d2420;
+  --card: #f5ebe4;
+  --card-foreground: #2d2420;
+  --popover: #f5ebe4;
+  --popover-foreground: #2d2420;
+  --primary: #2d2420;
+  --primary-foreground: #f5ebe4;
+  --secondary: #d4c4b8;
+  --secondary-foreground: #2d2420;
+  --muted: #d4c4b8;
+  --muted-foreground: #6b5d56;
+  --accent: #c9b8ab;
+  --accent-foreground: #2d2420;
+  --destructive: #c85a54;
+  --destructive-foreground: #ffffff;
+  --border: #c9b8ab;
+  --input: #c9b8ab;
+  --input-background: #f5ebe4;
+  --switch-background: #c9b8ab;
+  --font-weight-medium: 400;
+  --font-weight-normal: 300;
+  --ring: #a89185;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', sans-serif;
+  }
+  @media (min-width: 768px) {
+    body { cursor: none; }
+    body * { cursor: none; }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    textarea { cursor: text; }
+  }
+}
+
+html { font-size: var(--font-size); }
