@@ -1,84 +1,85 @@
-import { useState } from 'react'
-import { motion } from 'motion/react'
-import { Eye, EyeOff } from 'lucide-react'
-import { Input } from './input'
-import { Button } from './button'
-import { toast } from 'sonner'
+import { useState } from "react"
+import { motion } from "motion/react"
+import { Eye, EyeOff } from "lucide-react"
+import { Input } from "./ui/input"
+import { Button } from "./ui/button"
+
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/
 
 interface LoginScreenProps {
   onLogin: (email: string, password: string) => Promise<void>
   onSwitchToRegister: () => void
 }
 
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/
-
 export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [emailError, setEmailError] = useState('')
+  const [emailError, setEmailError] = useState("")
 
   const validateEmail = (value: string) => {
-    if (!value) return 'Email is required'
-    if (!EMAIL_REGEX.test(value.trim())) return 'Please enter a valid email address'
-    return ''
-  }
-
-  const handleEmailBlur = () => {
-    setEmailError(validateEmail(email))
+    if (!value) return "Email is required"
+    if (!EMAIL_REGEX.test(value.trim())) return "Please enter a valid email address"
+    return ""
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const emailErr = validateEmail(email)
     if (emailErr) { setEmailError(emailErr); return }
-    if (!password || isLoading) return
-
-    setIsLoading(true)
-    try {
-      await onLogin(email.trim().toLowerCase(), password)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Login failed')
-    } finally {
-      setIsLoading(false)
+    if (email && password && !isLoading) {
+      setIsLoading(true)
+      try {
+        await onLogin(email, password)
+      } catch (error) {
+        // Error is handled in parent component
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
   return (
     <div className="min-h-screen bg-[#e8dad1] relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.03, scale: 1 }}
-          transition={{ duration: 2, ease: [0.19, 1, 0.22, 1] }}
+          transition={{ duration: 2, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
           className="absolute top-20 right-20 w-96 h-96 bg-[#c9b8ab] rounded-full blur-3xl"
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.03, scale: 1 }}
-          transition={{ duration: 2, delay: 0.3, ease: [0.19, 1, 0.22, 1] }}
+          transition={{ duration: 2, delay: 0.3, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
           className="absolute bottom-20 left-20 w-96 h-96 bg-[#d4c4b8] rounded-full blur-3xl"
         />
       </div>
 
+      {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+        transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
         className="relative z-10 flex items-center justify-between px-8 py-6"
       >
-        <div className="text-[#2d2420] tracking-tight font-medium">-TODO-</div>
-        <div className="text-sm text-[#6b5d56]">©2025</div>
+        <div className="text-[#2d2420] tracking-tight">-TODO-</div>
+        <div className="flex items-center gap-3">
+          <div className="text-sm text-[#6b5d56]">©2025</div>
+        </div>
       </motion.header>
 
-      <div className="relative z-10 flex items-center justify-center px-6" style={{ minHeight: 'calc(100vh - 88px)' }}>
+      {/* Main Content */}
+      <div className="relative z-10 flex items-center justify-center px-6" style={{ minHeight: "calc(100vh - 88px)" }}>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.19, 1, 0.22, 1] }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
           className="w-full max-w-md"
         >
+          {/* Label */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -88,10 +89,11 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
             Your Personal Task Manager
           </motion.p>
 
+          {/* Hero Text */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+            transition={{ delay: 0.4, duration: 0.8, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
             className="mb-8 text-center"
           >
             <h1 className="text-6xl md:text-7xl mb-4 text-[#2d2420]">
@@ -101,42 +103,41 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
             </h1>
           </motion.div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+              transition={{ delay: 0.5, duration: 0.8, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
             >
               <label htmlFor="email" className="block mb-3 text-[#6b5d56] text-sm">Email</label>
               <Input
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError('') }}
-                onBlur={handleEmailBlur}
-                className={`h-14 px-5 ${emailError ? 'border-[#c85a54] focus-visible:border-[#c85a54] focus-visible:ring-[#c85a54]/30' : ''}`}
+                onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError("") }}
+                onBlur={() => setEmailError(validateEmail(email))}
+                className={`bg-[#f5ebe4] border-[#c9b8ab] text-[#2d2420] h-14 px-5 focus:border-[#a89185] transition-all duration-300 placeholder:text-[#a89185] ${emailError ? "border-[#c85a54]" : ""}`}
                 placeholder="you@example.com"
                 autoComplete="email"
                 required
               />
-              {emailError && (
-                <p className="mt-2 text-xs text-[#c85a54]">{emailError}</p>
-              )}
+              {emailError && <p className="mt-2 text-xs text-[#c85a54]">{emailError}</p>}
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+              transition={{ delay: 0.6, duration: 0.8, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
             >
               <label htmlFor="password" className="block mb-3 text-[#6b5d56] text-sm">Password</label>
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-14 px-5 pr-12"
+                  className="bg-[#f5ebe4] border-[#c9b8ab] text-[#2d2420] h-14 px-5 pr-12 focus:border-[#a89185] transition-all duration-300 placeholder:text-[#a89185]"
                   placeholder="••••••••"
                   autoComplete="current-password"
                   required
@@ -145,7 +146,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a89185] hover:text-[#6b5d56] transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -155,15 +156,15 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+              transition={{ delay: 0.7, duration: 0.8, ease: [0.19, 1, 0.22, 1] as [number, number, number, number] }}
               className="pt-4"
             >
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#2d2420] text-[#f5ebe4] hover:bg-[#3d3430] h-14 transition-all duration-300 rounded-full disabled:opacity-50"
+                className="w-full bg-[#2d2420] text-[#f5ebe4] hover:bg-[#3d3430] h-14 transition-all duration-300 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Signing in...' : 'Sign in →'}
+                {isLoading ? "Signing in..." : "Sign in →"}
               </Button>
             </motion.div>
 
@@ -171,7 +172,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              className="text-center pt-2"
+              className="text-center pt-6"
             >
               <button
                 type="button"
@@ -182,6 +183,9 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
                 <span><strong>FIRST TIME? CREATE ACCOUNT HERE</strong></span>
                 <span>👈</span>
               </button>
+              <p className="mt-3 text-xs text-[#6b5d56]">
+                Already have an account? Use the form above to sign in.
+              </p>
             </motion.div>
           </form>
         </motion.div>
