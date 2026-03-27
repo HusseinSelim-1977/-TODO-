@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Eye, EyeOff } from 'lucide-react'
 import { Input } from './input'
 import { Button } from './button'
 import { toast } from 'sonner'
 
 interface RegisterScreenProps {
-  onRegister: (name: string, email: string, password: string) => Promise<void>
+  onRegister: (email: string, password: string, name: string) => Promise<void>
   onSwitchToLogin: () => void
 }
 
@@ -57,7 +57,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenPr
 
     setIsLoading(true)
     try {
-      await onRegister(name.trim(), email.trim().toLowerCase(), password)
+      await onRegister(email.trim().toLowerCase(), password, name.trim())
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed')
     } finally {

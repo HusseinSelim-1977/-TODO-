@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Input } from './input'
 import { Button } from './button'
 import { Checkbox } from './checkbox'
@@ -7,7 +7,7 @@ import { Trash2, Plus, Pencil, Check, X } from 'lucide-react'
 import { NavigationToggle } from './NavigationToggle'
 import { ProjectCard } from './ProjectCard'
 import { InteractiveText } from './InteractiveText'
-import { api, type Todo } from '../api'
+import { api, type Todo } from '../services/api'
 import { toast } from 'sonner'
 
 interface TodoScreenProps {

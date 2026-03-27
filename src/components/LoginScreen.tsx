@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Eye, EyeOff } from 'lucide-react'
 import { Input } from './input'
 import { Button } from './button'
