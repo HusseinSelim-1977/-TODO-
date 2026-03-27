@@ -32,24 +32,29 @@ mongoose
 // ── Models ────────────────────────────────────────────────────────────────────
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true, maxlength: 100 },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    name:     { type: String, required: true, trim: true, maxlength: 100 },
+    // unique: true already creates the index — no need for userSchema.index({ email: 1 })
+    email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 6, select: false },
   },
   { timestamps: true },
 )
-userSchema.index({ email: 1 })
+// ✅ No duplicate index — unique:true above handles it
 const User = mongoose.model('User', userSchema)
 
 const todoSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, trim: true, maxlength: 500 },
-    completed: { type: Boolean, default: false },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    title:     { type: String, required: true, trim: true, maxlength: 500 },
+    completed: { type: Boolean, default: false, index: true },  // filter by status fast
+    user:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true },
 )
-todoSchema.index({ user: 1, createdAt: -1 })  // compound index for fast per-user queries
+// Compound index: all todo queries are scoped to a user, sorted by newest first.
+// Covers: find({user}) sort({createdAt:-1}), find({user,completed}), findOneAndUpdate/Delete({user,_id})
+todoSchema.index({ user: 1, createdAt: -1 })
+// Partial index for active todos — speeds up "show active tasks" queries at scale
+todoSchema.index({ user: 1, completed: 1 }, { partialFilterExpression: { completed: false } })
 const Todo = mongoose.model('Todo', todoSchema)
 
 // ── App ───────────────────────────────────────────────────────────────────────
@@ -137,11 +142,17 @@ authRouter.post('/register', authLimiter, async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters' })
     }
-    const exists = await User.findOne({ email }).lean()
-    if (exists) return res.status(400).json({ message: 'Email already registered' })
-
+    // Use the unique index — let MongoDB reject duplicates rather than doing a pre-check read
     const hashed = await bcrypt.hash(password, BCRYPT_ROUNDS)
-    const user = await User.create({ name, email, password: hashed })
+    let user
+    try {
+      user = await User.create({ name, email: email.toLowerCase().trim(), password: hashed })
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({ message: 'Email already registered' })
+      }
+      throw err
+    }
 
     res.status(201).json({
       token: signToken(user._id),
@@ -161,7 +172,11 @@ authRouter.post('/login', authLimiter, async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' })
     }
-    const user = await User.findOne({ email }).select('+password').lean()
+    // select only the fields we need — hits the email index, fetches minimal data
+    const user = await User.findOne(
+      { email: email.toLowerCase().trim() },
+      { name: 1, email: 1, password: 1 },  // projection: only what we need
+    ).lean()
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' })
     }
@@ -179,7 +194,8 @@ authRouter.post('/login', authLimiter, async (req, res) => {
 
 authRouter.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).lean()
+    // Project only needed fields — avoids fetching password hash or timestamps
+    const user = await User.findById(req.userId, { name: 1, email: 1 }).lean()
     if (!user) return res.status(404).json({ message: 'User not found' })
     res.json({ _id: user._id, name: user.name, email: user.email })
   } catch {
@@ -193,7 +209,11 @@ todoRouter.use(authMiddleware)
 
 todoRouter.get('/', apiLimiter, async (req, res) => {
   try {
-    const todos = await Todo.find({ user: req.userId }).sort({ createdAt: -1 }).lean()
+    // Hits compound index {user:1, createdAt:-1} perfectly — covered query, no collection scan
+    const todos = await Todo.find(
+      { user: req.userId },
+      { title: 1, completed: 1, createdAt: 1, updatedAt: 1 },  // project only client-needed fields
+    ).sort({ createdAt: -1 }).lean()
     res.json(todos)
   } catch {
     res.status(500).json({ message: 'Server error' })
@@ -207,7 +227,15 @@ todoRouter.post('/', apiLimiter, async (req, res) => {
       return res.status(400).json({ message: 'Title is required' })
     }
     const todo = await Todo.create({ title: title.trim(), user: req.userId })
-    res.status(201).json(todo)
+    // Return only the fields the client needs
+    res.status(201).json({
+      _id: todo._id,
+      title: todo.title,
+      completed: todo.completed,
+      user: todo.user,
+      createdAt: todo.createdAt,
+      updatedAt: todo.updatedAt,
+    })
   } catch {
     res.status(500).json({ message: 'Server error' })
   }
@@ -220,10 +248,15 @@ todoRouter.put('/:id', apiLimiter, async (req, res) => {
     if (title !== undefined) update.title = title.trim()
     if (completed !== undefined) update.completed = completed
 
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ message: 'No fields to update' })
+    }
+
+    // {user,_id} filter ensures ownership — hits the compound index
     const todo = await Todo.findOneAndUpdate(
       { _id: req.params.id, user: req.userId },
-      update,
-      { new: true, runValidators: true },
+      { $set: update },  // explicit $set is more efficient than implicit
+      { new: true, runValidators: true, projection: { title: 1, completed: 1, createdAt: 1, updatedAt: 1 } },
     ).lean()
 
     if (!todo) return res.status(404).json({ message: 'Todo not found' })
@@ -235,7 +268,11 @@ todoRouter.put('/:id', apiLimiter, async (req, res) => {
 
 todoRouter.delete('/:id', apiLimiter, async (req, res) => {
   try {
-    const todo = await Todo.findOneAndDelete({ _id: req.params.id, user: req.userId })
+    // findOneAndDelete with ownership check — no extra read needed
+    const todo = await Todo.findOneAndDelete(
+      { _id: req.params.id, user: req.userId },
+      { projection: { _id: 1 } },  // we only need to confirm it existed
+    ).lean()
     if (!todo) return res.status(404).json({ message: 'Todo not found' })
     res.json({ message: 'Deleted' })
   } catch {
