@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Eye, EyeOff } from 'lucide-react'
 import { Input } from './input'
 import { Button } from './button'
 import { toast } from 'sonner'
@@ -9,28 +10,62 @@ interface RegisterScreenProps {
   onSwitchToLogin: () => void
 }
 
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
+
+function getPasswordStrength(password: string): { label: string; color: string; width: string } {
+  if (!password) return { label: '', color: '', width: '0%' }
+  if (password.length < 8) return { label: 'Too short', color: '#c85a54', width: '25%' }
+  const hasLetter = /[A-Za-z]/.test(password)
+  const hasNumber = /\d/.test(password)
+  const hasSpecial = /[^A-Za-z0-9]/.test(password)
+  const hasUpper = /[A-Z]/.test(password)
+  const score = [hasLetter, hasNumber, hasSpecial, hasUpper, password.length >= 12].filter(Boolean).length
+  if (score <= 2) return { label: 'Weak', color: '#c85a54', width: '40%' }
+  if (score === 3) return { label: 'Fair', color: '#d4a017', width: '65%' }
+  if (score === 4) return { label: 'Good', color: '#6b9e6b', width: '80%' }
+  return { label: 'Strong', color: '#2d7a2d', width: '100%' }
+}
+
 export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({})
+
+  const validate = () => {
+    const newErrors: typeof errors = {}
+    if (!name.trim()) newErrors.name = 'Name is required'
+    else if (name.trim().length > 100) newErrors.name = 'Name must be under 100 characters'
+
+    if (!email) newErrors.email = 'Email is required'
+    else if (!EMAIL_REGEX.test(email.trim())) newErrors.email = 'Please enter a valid email address'
+
+    if (!password) newErrors.password = 'Password is required'
+    else if (!PASSWORD_REGEX.test(password)) newErrors.password = 'Min 8 characters with at least one letter and one number'
+
+    return newErrors
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name || !email || !password || isLoading) return
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters')
-      return
-    }
+    const newErrors = validate()
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return }
+    if (isLoading) return
+
     setIsLoading(true)
     try {
-      await onRegister(name, email, password)
+      await onRegister(name.trim(), email.trim().toLowerCase(), password)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed')
     } finally {
       setIsLoading(false)
     }
   }
+
+  const strength = getPasswordStrength(password)
 
   return (
     <div className="min-h-screen bg-[#e8dad1] relative overflow-hidden">
@@ -82,30 +117,97 @@ export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenPr
             </h1>
           </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+            {/* Name */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.8 }}>
               <label htmlFor="name" className="block mb-3 text-[#6b5d56] text-sm">Name</label>
-              <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} className="h-14 px-5" placeholder="Your name" required />
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => { setName(e.target.value); if (errors.name) setErrors(p => ({ ...p, name: undefined })) }}
+                className={`h-14 px-5 ${errors.name ? 'border-[#c85a54]' : ''}`}
+                placeholder="Your name"
+                autoComplete="name"
+                required
+              />
+              {errors.name && <p className="mt-2 text-xs text-[#c85a54]">{errors.name}</p>}
             </motion.div>
 
+            {/* Email */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }}>
               <label htmlFor="reg-email" className="block mb-3 text-[#6b5d56] text-sm">Email</label>
-              <Input id="reg-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 px-5" placeholder="you@example.com" required />
+              <Input
+                id="reg-email"
+                type="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors(p => ({ ...p, email: undefined })) }}
+                className={`h-14 px-5 ${errors.email ? 'border-[#c85a54]' : ''}`}
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+              />
+              {errors.email && <p className="mt-2 text-xs text-[#c85a54]">{errors.email}</p>}
             </motion.div>
 
+            {/* Password */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.8 }}>
               <label htmlFor="reg-password" className="block mb-3 text-[#6b5d56] text-sm">Password</label>
-              <Input id="reg-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 px-5" placeholder="Min. 6 characters" required />
+              <div className="relative">
+                <Input
+                  id="reg-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors(p => ({ ...p, password: undefined })) }}
+                  className={`h-14 px-5 pr-12 ${errors.password ? 'border-[#c85a54]' : ''}`}
+                  placeholder="Min. 8 chars, letter + number"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a89185] hover:text-[#6b5d56] transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Password strength bar */}
+              {password && (
+                <div className="mt-2">
+                  <div className="h-1 w-full bg-[#d4c4b8] rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: strength.color }}
+                      initial={{ width: '0%' }}
+                      animate={{ width: strength.width }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs" style={{ color: strength.color }}>{strength.label}</p>
+                </div>
+              )}
+              {errors.password && <p className="mt-1 text-xs text-[#c85a54]">{errors.password}</p>}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.8 }} className="pt-4">
-              <Button type="submit" disabled={isLoading} className="w-full bg-[#2d2420] text-[#f5ebe4] hover:bg-[#3d3430] h-14 transition-all duration-300 rounded-full disabled:opacity-50">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-[#2d2420] text-[#f5ebe4] hover:bg-[#3d3430] h-14 transition-all duration-300 rounded-full disabled:opacity-50"
+              >
                 {isLoading ? 'Creating account...' : 'Create account →'}
               </Button>
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.8 }} className="text-center pt-2">
-              <button type="button" onClick={onSwitchToLogin} className="w-full bg-[#c9b8ab] text-[#2d2420] hover:bg-[#a89185] h-14 transition-all duration-300 rounded-full">
+              <button
+                type="button"
+                onClick={onSwitchToLogin}
+                className="w-full bg-[#c9b8ab] text-[#2d2420] hover:bg-[#a89185] h-14 transition-all duration-300 rounded-full"
+              >
                 Already have an account? Sign in →
               </button>
             </motion.div>

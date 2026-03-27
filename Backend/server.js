@@ -112,6 +112,19 @@ const JWT_SECRET = process.env.JWT_SECRET
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d'
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10)
 
+// RFC 5322 compliant email regex
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/
+// Password: min 8 chars, at least one letter and one number
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
+
+function validateEmail(email) {
+  return typeof email === 'string' && EMAIL_REGEX.test(email.trim())
+}
+
+function validatePassword(password) {
+  return typeof password === 'string' && PASSWORD_REGEX.test(password)
+}
+
 function signToken(id) {
   return jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRE })
 }
@@ -136,17 +149,29 @@ const authRouter = express.Router()
 authRouter.post('/register', authLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body
+
+    // Presence check
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password are required' })
     }
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' })
+    // Sanitize name — strip any HTML/script tags
+    const safeName = String(name).trim().replace(/<[^>]*>/g, '')
+    if (!safeName || safeName.length > 100) {
+      return res.status(400).json({ message: 'Name must be between 1 and 100 characters' })
     }
-    // Use the unique index — let MongoDB reject duplicates rather than doing a pre-check read
+    // Email format validation
+    if (!validateEmail(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address' })
+    }
+    // Password strength: min 8 chars, at least one letter and one number
+    if (!validatePassword(password)) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters and contain at least one letter and one number' })
+    }
+
     const hashed = await bcrypt.hash(password, BCRYPT_ROUNDS)
     let user
     try {
-      user = await User.create({ name, email: email.toLowerCase().trim(), password: hashed })
+      user = await User.create({ name: safeName, email: email.toLowerCase().trim(), password: hashed })
     } catch (err) {
       if (err.code === 11000) {
         return res.status(400).json({ message: 'Email already registered' })
@@ -172,12 +197,18 @@ authRouter.post('/login', authLimiter, async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' })
     }
-    // select only the fields we need — hits the email index, fetches minimal data
+    // Validate email format before hitting the DB
+    if (!validateEmail(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address' })
+    }
     const user = await User.findOne(
       { email: email.toLowerCase().trim() },
-      { name: 1, email: 1, password: 1 },  // projection: only what we need
+      { name: 1, email: 1, password: 1 },
     ).lean()
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    // Always run bcrypt compare to prevent timing attacks (even if user not found)
+    const dummyHash = '$2b$12$invalidhashfortimingprotectiononly000000000000000000000'
+    const passwordMatch = await bcrypt.compare(password, user ? user.password : dummyHash)
+    if (!user || !passwordMatch) {
       return res.status(401).json({ message: 'Invalid credentials' })
     }
     res.json({
